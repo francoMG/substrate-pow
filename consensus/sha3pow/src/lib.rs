@@ -1,9 +1,9 @@
-use parity_scale_codec::{Decode, Encode};
-use sc_consensus_pow::{Error, PowAlgorithm};
-use sha3::{Digest, Sha3_256};
+use parity_scale_codec::{ Decode, Encode };
+use sc_consensus_pow::{ Error, PowAlgorithm };
+use sha3::{ Digest, Sha3_256 };
 use sp_api::ProvideRuntimeApi;
-use sp_consensus_pow::{DifficultyApi, Seal as RawSeal};
-use sp_core::{H256, U256};
+use sp_consensus_pow::{ DifficultyApi, Seal as RawSeal };
+use sp_core::{ H256, U256 };
 use sp_runtime::generic::BlockId;
 use sp_runtime::traits::Block as BlockT;
 use std::sync::Arc;
@@ -69,12 +69,14 @@ impl<B: BlockT<Hash = H256>> PowAlgorithm<B> for MinimalSha3Algorithm {
 		pre_hash: &H256,
 		_pre_digest: Option<&[u8]>,
 		seal: &RawSeal,
-		difficulty: Self::Difficulty,
+		difficulty: Self::Difficulty
 	) -> Result<bool, Error<B>> {
 		// Try to construct a seal object by decoding the raw seal given
 		let seal = match Seal::decode(&mut &seal[..]) {
 			Ok(seal) => seal,
-			Err(_) => return Ok(false),
+			Err(_) => {
+				return Ok(false);
+			}
 		};
 
 		// See whether the hash meets the difficulty requirement. If not, fail fast.
@@ -118,10 +120,9 @@ impl<C> Clone for Sha3Algorithm<C> {
 }
 
 // Here we implement the general PowAlgorithm trait for our concrete Sha3Algorithm
-impl<B: BlockT<Hash = H256>, C> PowAlgorithm<B> for Sha3Algorithm<C>
-where
-	C: ProvideRuntimeApi<B>,
-	C::Api: DifficultyApi<B, U256>,
+impl<B: BlockT<Hash = H256>, C> PowAlgorithm<B>
+	for Sha3Algorithm<C>
+	where C: ProvideRuntimeApi<B>, C::Api: DifficultyApi<B, U256>
 {
 	type Difficulty = U256;
 
@@ -131,10 +132,9 @@ where
 			.runtime_api()
 			.difficulty(&parent_id)
 			.map_err(|err| {
-				sc_consensus_pow::Error::Environment(format!(
-					"Fetching difficulty from runtime failed: {:?}",
-					err
-				))
+				sc_consensus_pow::Error::Environment(
+					format!("Fetching difficulty from runtime failed: {:?}", err)
+				)
 			})
 	}
 
@@ -144,12 +144,14 @@ where
 		pre_hash: &H256,
 		_pre_digest: Option<&[u8]>,
 		seal: &RawSeal,
-		difficulty: Self::Difficulty,
+		difficulty: Self::Difficulty
 	) -> Result<bool, Error<B>> {
 		// Try to construct a seal object by decoding the raw seal given
 		let seal = match Seal::decode(&mut &seal[..]) {
 			Ok(seal) => seal,
-			Err(_) => return Ok(false),
+			Err(_) => {
+				return Ok(false);
+			}
 		};
 
 		// See whether the hash meets the difficulty requirement. If not, fail fast.
