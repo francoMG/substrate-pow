@@ -1,17 +1,17 @@
 //! Service and ServiceFactory implementation. Specialized wrapper over substrate service.
 #![allow(clippy::needless_borrow)]
-use runtime::{self, opaque::Block, RuntimeApi};
-use sc_client_api::{ExecutorProvider, RemoteBackend};
+use runtime::{ self, opaque::Block, RuntimeApi };
+use sc_client_api::{ ExecutorProvider, RemoteBackend };
 use sc_executor::native_executor_instance;
 pub use sc_executor::NativeExecutor;
-use sc_service::{error::Error as ServiceError, Configuration, PartialComponents, TaskManager};
+use sc_service::{ error::Error as ServiceError, Configuration, PartialComponents, TaskManager };
 use sha3pow::*;
 use sp_api::TransactionFor;
 use sp_consensus::import_queue::BasicQueue;
-use sp_core::{Encode, U256};
+use sp_core::{ Encode, U256 };
 use sp_inherents::InherentDataProviders;
 use std::thread;
-use std::{sync::Arc, time::Duration};
+use std::{ sync::Arc, time::Duration };
 
 // Our native executor instance.
 native_executor_instance!(
@@ -39,7 +39,7 @@ pub fn build_inherent_data_providers() -> Result<InherentDataProviders, ServiceE
 /// But enough to perform chain operations like purge-chain
 #[allow(clippy::type_complexity)]
 pub fn new_partial(
-	config: &Configuration,
+	config: &Configuration
 ) -> Result<
 	PartialComponents<
 		FullClient,
@@ -53,15 +53,18 @@ pub fn new_partial(
 			FullClient,
 			FullSelectChain,
 			MinimalSha3Algorithm,
-			impl sp_consensus::CanAuthorWith<Block>,
-		>,
+			impl sp_consensus::CanAuthorWith<Block>
+		>
 	>,
-	ServiceError,
+	ServiceError
 > {
 	let inherent_data_providers = build_inherent_data_providers()?;
 
-	let (client, backend, keystore_container, task_manager) =
-		sc_service::new_full_parts::<Block, RuntimeApi, Executor>(&config)?;
+	let (client, backend, keystore_container, task_manager) = sc_service::new_full_parts::<
+		Block,
+		RuntimeApi,
+		Executor
+	>(&config)?;
 	let client = Arc::new(client);
 
 	let select_chain = sc_consensus::LongestChain::new(backend.clone());
@@ -71,7 +74,7 @@ pub fn new_partial(
 		config.role.is_authority().into(),
 		config.prometheus_registry(),
 		task_manager.spawn_handle(),
-		client.clone(),
+		client.clone()
 	);
 
 	let can_author_with = sp_consensus::CanAuthorWithNativeVersion::new(client.executor().clone());
@@ -83,7 +86,7 @@ pub fn new_partial(
 		0, // check inherents starting at block 0
 		select_chain.clone(),
 		inherent_data_providers.clone(),
-		can_author_with,
+		can_author_with
 	);
 
 	let import_queue = sc_consensus_pow::import_queue(
@@ -92,7 +95,7 @@ pub fn new_partial(
 		sha3pow::MinimalSha3Algorithm,
 		inherent_data_providers.clone(),
 		&task_manager.spawn_handle(),
-		config.prometheus_registry(),
+		config.prometheus_registry()
 	)?;
 
 	Ok(PartialComponents {
@@ -122,8 +125,8 @@ pub fn new_full(config: Configuration) -> Result<TaskManager, ServiceError> {
 		other: pow_block_import,
 	} = new_partial(&config)?;
 
-	let (network, network_status_sinks, system_rpc_tx, network_starter) =
-		sc_service::build_network(sc_service::BuildNetworkParams {
+	let (network, network_status_sinks, system_rpc_tx, network_starter) = sc_service::build_network(
+		sc_service::BuildNetworkParams {
 			config: &config,
 			client: client.clone(),
 			transaction_pool: transaction_pool.clone(),
@@ -131,7 +134,8 @@ pub fn new_full(config: Configuration) -> Result<TaskManager, ServiceError> {
 			import_queue,
 			on_demand: None,
 			block_announce_validator_builder: None,
-		})?;
+		}
+	)?;
 
 	if config.offchain_worker.enabled {
 		sc_service::build_offchain_workers(
@@ -139,7 +143,7 @@ pub fn new_full(config: Configuration) -> Result<TaskManager, ServiceError> {
 			backend.clone(),
 			task_manager.spawn_handle(),
 			client.clone(),
-			network.clone(),
+			network.clone()
 		);
 	}
 
@@ -166,11 +170,10 @@ pub fn new_full(config: Configuration) -> Result<TaskManager, ServiceError> {
 			task_manager.spawn_handle(),
 			client.clone(),
 			transaction_pool,
-			prometheus_registry.as_ref(),
+			prometheus_registry.as_ref()
 		);
 
-		let can_author_with =
-			sp_consensus::CanAuthorWithNativeVersion::new(client.executor().clone());
+		let can_author_with = sp_consensus::CanAuthorWithNativeVersion::new(client.executor().clone());
 
 		// Parameter details:
 		//   https://substrate.dev/rustdocs/v3.0.0/sc_consensus_pow/fn.start_mining_worker.html
@@ -189,37 +192,37 @@ pub fn new_full(config: Configuration) -> Result<TaskManager, ServiceError> {
 			Duration::from_secs(10),
 			// how long to take to actually build the block (i.e. executing extrinsics)
 			Duration::from_secs(10),
-			can_author_with,
+			can_author_with
 		);
 
-		task_manager
-			.spawn_essential_handle()
-			.spawn_blocking("pow", worker_task);
+		task_manager.spawn_essential_handle().spawn_blocking("pow", worker_task);
 
 		// Start Mining
 		let mut nonce: U256 = U256::from(0);
-		thread::spawn(move || loop {
-			let worker = _worker.clone();
-			let metadata = worker.lock().metadata();
-			if let Some(metadata) = metadata {
-				let compute = Compute {
-					difficulty: metadata.difficulty,
-					pre_hash: metadata.pre_hash,
-					nonce,
-				};
-				let seal = compute.compute();
-				if hash_meets_difficulty(&seal.work, seal.difficulty) {
-					nonce = U256::from(0);
-					let mut worker = worker.lock();
-					worker.submit(seal.encode());
-				} else {
-					nonce = nonce.saturating_add(U256::from(1));
-					if nonce == U256::MAX {
+		thread::spawn(move || {
+			loop {
+				let worker = _worker.clone();
+				let metadata = worker.lock().metadata();
+				if let Some(metadata) = metadata {
+					let compute = Compute {
+						difficulty: metadata.difficulty,
+						pre_hash: metadata.pre_hash,
+						nonce,
+					};
+					let seal = compute.compute();
+					if hash_meets_difficulty(&seal.work, seal.difficulty) {
 						nonce = U256::from(0);
+						let mut worker = worker.lock();
+						worker.submit(seal.encode());
+					} else {
+						nonce = nonce.saturating_add(U256::from(1));
+						if nonce == U256::MAX {
+							nonce = U256::from(0);
+						}
 					}
+				} else {
+					thread::sleep(Duration::new(1, 0));
 				}
-			} else {
-				thread::sleep(Duration::new(1, 0));
 			}
 		});
 	}
@@ -233,13 +236,15 @@ pub fn new_light(config: Configuration) -> Result<TaskManager, ServiceError> {
 	let (client, backend, keystore_container, mut task_manager, on_demand) =
 		sc_service::new_light_parts::<Block, RuntimeApi, Executor>(&config)?;
 
-	let transaction_pool = Arc::new(sc_transaction_pool::BasicPool::new_light(
-		config.transaction_pool.clone(),
-		config.prometheus_registry(),
-		task_manager.spawn_handle(),
-		client.clone(),
-		on_demand.clone(),
-	));
+	let transaction_pool = Arc::new(
+		sc_transaction_pool::BasicPool::new_light(
+			config.transaction_pool.clone(),
+			config.prometheus_registry(),
+			task_manager.spawn_handle(),
+			client.clone(),
+			on_demand.clone()
+		)
+	);
 
 	let select_chain = sc_consensus::LongestChain::new(backend.clone());
 	let inherent_data_providers = build_inherent_data_providers()?;
@@ -254,7 +259,7 @@ pub fn new_light(config: Configuration) -> Result<TaskManager, ServiceError> {
 		select_chain,
 		inherent_data_providers.clone(),
 		// FixMe #375
-		sp_consensus::AlwaysCanAuthor,
+		sp_consensus::AlwaysCanAuthor
 	);
 
 	let import_queue = sc_consensus_pow::import_queue(
@@ -263,11 +268,11 @@ pub fn new_light(config: Configuration) -> Result<TaskManager, ServiceError> {
 		sha3pow::MinimalSha3Algorithm,
 		inherent_data_providers,
 		&task_manager.spawn_handle(),
-		config.prometheus_registry(),
+		config.prometheus_registry()
 	)?;
 
-	let (network, network_status_sinks, system_rpc_tx, network_starter) =
-		sc_service::build_network(sc_service::BuildNetworkParams {
+	let (network, network_status_sinks, system_rpc_tx, network_starter) = sc_service::build_network(
+		sc_service::BuildNetworkParams {
 			config: &config,
 			client: client.clone(),
 			transaction_pool: transaction_pool.clone(),
@@ -275,7 +280,8 @@ pub fn new_light(config: Configuration) -> Result<TaskManager, ServiceError> {
 			import_queue,
 			on_demand: Some(on_demand.clone()),
 			block_announce_validator_builder: None,
-		})?;
+		}
+	)?;
 
 	sc_service::spawn_tasks(sc_service::SpawnTasksParams {
 		remote_blockchain: Some(backend.remote_blockchain()),
