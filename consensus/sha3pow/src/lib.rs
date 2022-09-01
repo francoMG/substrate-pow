@@ -7,6 +7,8 @@ use sp_core::{ H256, U256 };
 use sp_runtime::generic::BlockId;
 use sp_runtime::traits::Block as BlockT;
 use std::sync::Arc;
+use sp_std::if_std as if_std;
+mod geo;
 
 /// Determine whether the given hash satisfies the given difficulty.
 /// The test is done by multiplying the two together. If the product
@@ -70,7 +72,18 @@ impl<B: BlockT<Hash = H256>> PowAlgorithm<B> for MinimalSha3Algorithm {
 		_pre_digest: Option<&[u8]>,
 		seal: &RawSeal,
 		difficulty: Self::Difficulty
+		// ip: &str
 	) -> Result<bool, Error<B>> {
+		if_std! {
+			println!("This message is not working D:");
+		}
+		// TODO: Use IP from the block
+		let ip = "0.0.0.0";
+		// See whether the node meets the location requirement. If not, fail fast.
+		if !geo::node_is_on_mining_zone(pre_hash, 0, ip) {
+			return Ok(false);
+		}
+
 		// Try to construct a seal object by decoding the raw seal given
 		let seal = match Seal::decode(&mut &seal[..]) {
 			Ok(seal) => seal,

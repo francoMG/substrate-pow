@@ -6,7 +6,7 @@ use sc_service::PartialComponents;
 
 impl SubstrateCli for Cli {
 	fn impl_name() -> String {
-		"Basic PoW Node".into()
+		"GeoBlockchain Node".into()
 	}
 
 	fn impl_version() -> String {
