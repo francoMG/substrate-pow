@@ -5,13 +5,14 @@ use sc_client_api::{ ExecutorProvider, RemoteBackend };
 use sc_executor::native_executor_instance;
 pub use sc_executor::NativeExecutor;
 use sc_service::{ error::Error as ServiceError, Configuration, PartialComponents, TaskManager };
-use sha3pow::*;
+use sha3pow::{ Compute, MinimalSha3Algorithm, hash_meets_difficulty };
 use sp_api::TransactionFor;
 use sp_consensus::import_queue::BasicQueue;
 use sp_core::{ Encode, U256 };
 use sp_inherents::InherentDataProviders;
 use std::thread;
 use std::{ sync::Arc, time::Duration };
+use sp_std::if_std as if_std;
 
 // Our native executor instance.
 native_executor_instance!(
@@ -201,6 +202,11 @@ pub fn new_full(config: Configuration) -> Result<TaskManager, ServiceError> {
 		let mut nonce: U256 = U256::from(0);
 		thread::spawn(move || {
 			loop {
+				if_std! {
+					println!("This message is not working ):");
+				}
+				// TODO: Stop if node is not on valid zone
+				// node_is_on_mining_zone(hash, timestamp)
 				let worker = _worker.clone();
 				let metadata = worker.lock().metadata();
 				if let Some(metadata) = metadata {
