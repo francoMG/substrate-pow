@@ -1,0 +1,3 @@
+#!/bin/bash
+cargo build --release -p basic-pow
+./target/release/basic-pow
