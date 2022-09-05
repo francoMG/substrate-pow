@@ -4,4 +4,3 @@ members = [
 	"nodes/basic-pow",
 	"consensus/sha3pow",
 ]
-librocksdb-sys = "6.17.3"
