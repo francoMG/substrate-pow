@@ -422,6 +422,7 @@ checksum = "904dfeac50f3cdaba28fc6f57fdcddb75f49ed61346676a78c4ffe55877802fd"
 name = "basic-pow"
 version = "3.0.0"
 dependencies = [
+ "consensus-geo-pow",
  "futures 0.3.13",
  "log",
  "rand 0.7.3",
@@ -429,7 +430,6 @@ dependencies = [
  "sc-cli",
  "sc-client-api",
  "sc-consensus",
- "sc-consensus-pow",
  "sc-executor",
  "sc-network",
  "sc-service",
@@ -917,6 +917,29 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "30ed07550be01594c6026cff2a1d7fe9c8f683caa798e12b68694ac9e88286a3"
 dependencies = [
  "cache-padded",
+]
+
+[[package]]
+name = "consensus-geo-pow"
+version = "0.0.1"
+dependencies = [
+ "derive_more",
+ "futures 0.3.13",
+ "futures-timer 3.0.2",
+ "log",
+ "parity-scale-codec",
+ "parking_lot 0.11.1",
+ "sc-client-api",
+ "sp-api",
+ "sp-block-builder",
+ "sp-blockchain",
+ "sp-consensus",
+ "sp-consensus-pow",
+ "sp-core",
+ "sp-inherents",
+ "sp-runtime",
+ "sp-timestamp",
+ "substrate-prometheus-endpoint",
 ]
 
 [[package]]
@@ -5058,31 +5081,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "sc-consensus-pow"
-version = "0.9.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "4eb1d00d33f7dba49c8e4f85ad36fd95217fbbc8c5bd8ccda2de5b5fd7aed5ac"
-dependencies = [
- "derive_more",
- "futures 0.3.13",
- "futures-timer 3.0.2",
- "log",
- "parity-scale-codec",
- "parking_lot 0.11.1",
- "sc-client-api",
- "sp-api",
- "sp-block-builder",
- "sp-blockchain",
- "sp-consensus",
- "sp-consensus-pow",
- "sp-core",
- "sp-inherents",
- "sp-runtime",
- "sp-timestamp",
- "substrate-prometheus-endpoint",
-]
-
-[[package]]
 name = "sc-consensus-slots"
 version = "0.9.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -5917,10 +5915,10 @@ dependencies = [
 name = "sha3pow"
 version = "3.0.0"
 dependencies = [
+ "consensus-geo-pow",
  "noise",
  "parity-scale-codec",
  "rand 0.8.3",
- "sc-consensus-pow",
  "sha3 0.9.1",
  "sp-api",
  "sp-consensus-pow",

@@ -1,5 +1,5 @@
 use parity_scale_codec::{ Decode, Encode };
-use sc_consensus_pow::{ Error, PowAlgorithm };
+use consensus_geo_pow::{ Error, PowAlgorithm };
 use sha3::{ Digest, Sha3_256 };
 use sp_api::ProvideRuntimeApi;
 use sp_consensus_pow::{ DifficultyApi, Seal as RawSeal };
@@ -145,7 +145,7 @@ impl<B: BlockT<Hash = H256>, C> PowAlgorithm<B>
 			.runtime_api()
 			.difficulty(&parent_id)
 			.map_err(|err| {
-				sc_consensus_pow::Error::Environment(
+				consensus_geo_pow::Error::Environment(
 					format!("Fetching difficulty from runtime failed: {:?}", err)
 				)
 			})

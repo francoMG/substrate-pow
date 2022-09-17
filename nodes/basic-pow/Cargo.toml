@@ -24,7 +24,7 @@ sc-basic-authorship = '0.9'
 sc-cli = '0.9'
 sc-client-api = '3.0'
 sc-consensus = '0.9'
-sc-consensus-pow = '0.9'
+consensus-geo-pow = { path = '../../consensus/pow' }
 sc-executor = '0.9'
 sc-network = '0.9'
 sc-service = '0.9'

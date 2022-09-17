@@ -13,6 +13,7 @@ use sp_inherents::InherentDataProviders;
 use std::thread;
 use std::{ sync::Arc, time::Duration };
 use sp_std::if_std as if_std;
+use consensus_geo_pow;
 
 // Our native executor instance.
 native_executor_instance!(
@@ -48,7 +49,7 @@ pub fn new_partial(
 		FullSelectChain,
 		BasicQueue<Block, TransactionFor<FullClient, Block>>,
 		sc_transaction_pool::FullPool<Block, FullClient>,
-		sc_consensus_pow::PowBlockImport<
+		consensus_geo_pow::PowBlockImport<
 			Block,
 			Arc<FullClient>,
 			FullClient,
@@ -80,7 +81,7 @@ pub fn new_partial(
 
 	let can_author_with = sp_consensus::CanAuthorWithNativeVersion::new(client.executor().clone());
 
-	let pow_block_import = sc_consensus_pow::PowBlockImport::new(
+	let pow_block_import = consensus_geo_pow::PowBlockImport::new(
 		client.clone(),
 		client.clone(),
 		sha3pow::MinimalSha3Algorithm,
@@ -90,7 +91,7 @@ pub fn new_partial(
 		can_author_with
 	);
 
-	let import_queue = sc_consensus_pow::import_queue(
+	let import_queue = consensus_geo_pow::import_queue(
 		Box::new(pow_block_import.clone()),
 		None,
 		sha3pow::MinimalSha3Algorithm,
@@ -180,7 +181,7 @@ pub fn new_full(config: Configuration) -> Result<TaskManager, ServiceError> {
 		//   https://substrate.dev/rustdocs/v3.0.0/sc_consensus_pow/fn.start_mining_worker.html
 		// Also refer to kulupu config:
 		//   https://github.com/kulupu/kulupu/blob/master/src/service.rs
-		let (_worker, worker_task) = sc_consensus_pow::start_mining_worker(
+		let (_worker, worker_task) = consensus_geo_pow::start_mining_worker(
 			Box::new(pow_block_import),
 			client,
 			select_chain,
@@ -257,7 +258,7 @@ pub fn new_light(config: Configuration) -> Result<TaskManager, ServiceError> {
 	// FixMe #375
 	let _can_author_with = sp_consensus::CanAuthorWithNativeVersion::new(client.executor().clone());
 
-	let pow_block_import = sc_consensus_pow::PowBlockImport::new(
+	let pow_block_import = consensus_geo_pow::PowBlockImport::new(
 		client.clone(),
 		client.clone(),
 		sha3pow::MinimalSha3Algorithm,
@@ -268,7 +269,7 @@ pub fn new_light(config: Configuration) -> Result<TaskManager, ServiceError> {
 		sp_consensus::AlwaysCanAuthor
 	);
 
-	let import_queue = sc_consensus_pow::import_queue(
+	let import_queue = consensus_geo_pow::import_queue(
 		Box::new(pow_block_import),
 		None,
 		sha3pow::MinimalSha3Algorithm,

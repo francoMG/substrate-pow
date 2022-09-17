@@ -14,8 +14,7 @@ sha3 = "0.9"
 noise = "0.7.0"
 
 # Substrate packages
-# TODO: replace with our own consensus engine
-sc-consensus-pow = '0.9'
+consensus-geo-pow = { path = '../pow' }
 sp-api = '3.0'
 sp-consensus-pow = '0.9'
 sp-core = '3.0'
