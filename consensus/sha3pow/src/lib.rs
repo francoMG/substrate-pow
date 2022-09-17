@@ -7,7 +7,6 @@ use sp_core::{ H256, U256 };
 use sp_runtime::generic::BlockId;
 use sp_runtime::traits::Block as BlockT;
 use std::sync::Arc;
-use sp_std::if_std as if_std;
 mod geo;
 
 /// Determine whether the given hash satisfies the given difficulty.
@@ -74,9 +73,8 @@ impl<B: BlockT<Hash = H256>> PowAlgorithm<B> for MinimalSha3Algorithm {
 		difficulty: Self::Difficulty
 		// ip: &str
 	) -> Result<bool, Error<B>> {
-		if_std! {
-			println!("This message is not working D:");
-		}
+		log::info!("VERIFYING");
+
 		// TODO: Use IP from the block
 		let ip = "0.0.0.0";
 		// See whether the node meets the location requirement. If not, fail fast.

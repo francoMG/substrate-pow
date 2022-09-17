@@ -12,6 +12,7 @@ parity-scale-codec = '2.0'
 rand = { version = "0.8", features = ["small_rng"] }
 sha3 = "0.9"
 noise = "0.7.0"
+log = "0.4.17"
 
 # Substrate packages
 consensus-geo-pow = { path = '../pow' }

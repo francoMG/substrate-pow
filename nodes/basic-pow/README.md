@@ -10,4 +10,4 @@ Start command:
 
 Start command with logs:
 
-- `RUST_LOG=runtime=debug ./target/release/basic-pow`
+- `RUST_LOG=runtime=debug ./target/release/basic-pow --dev`

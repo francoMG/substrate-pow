@@ -13,11 +13,11 @@ path = 'src/main.rs'
 
 [dependencies]
 futures = '0.3.4'
-log = '0.4.8'
 rand = { version = "0.7.2", features = ["small_rng"] }
 sha3 = "0.8.0"
 structopt = '0.3.8'
 sp-std = '4.0.0'
+log = "0.4.17"
 
 # Substrate packages
 sc-basic-authorship = '0.9'

@@ -12,7 +12,6 @@ use sp_core::{ Encode, U256 };
 use sp_inherents::InherentDataProviders;
 use std::thread;
 use std::{ sync::Arc, time::Duration };
-use sp_std::if_std as if_std;
 use consensus_geo_pow;
 
 // Our native executor instance.
@@ -202,10 +201,8 @@ pub fn new_full(config: Configuration) -> Result<TaskManager, ServiceError> {
 		// Start Mining
 		let mut nonce: U256 = U256::from(0);
 		thread::spawn(move || {
+			log::info!("STARTING MINING");
 			loop {
-				if_std! {
-					println!("This message is not working ):");
-				}
 				// TODO: Stop if node is not on valid zone
 				// node_is_on_mining_zone(hash, timestamp)
 				let worker = _worker.clone();
