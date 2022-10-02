@@ -18,6 +18,7 @@ sha3 = "0.8.0"
 structopt = '0.3.8'
 sp-std = '4.0.0'
 log = "0.4.17"
+public-ip = "0.2.2"
 
 # Substrate packages
 sc-basic-authorship = '0.9'

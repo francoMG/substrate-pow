@@ -5,13 +5,14 @@ use sc_client_api::{ ExecutorProvider, RemoteBackend };
 use sc_executor::native_executor_instance;
 pub use sc_executor::NativeExecutor;
 use sc_service::{ error::Error as ServiceError, Configuration, PartialComponents, TaskManager };
-use sha3pow::{ Compute, MinimalSha3Algorithm, hash_meets_difficulty };
+use sha3pow::{ Compute, MinimalSha3Algorithm, hash_meets_difficulty, node_is_on_mining_zone };
 use sp_api::TransactionFor;
 use sp_consensus::import_queue::BasicQueue;
 use sp_core::{ Encode, U256 };
 use sp_inherents::InherentDataProviders;
 use std::thread;
 use std::{ sync::Arc, time::Duration };
+use public_ip;
 use consensus_geo_pow;
 
 // Our native executor instance.
@@ -202,29 +203,42 @@ pub fn new_full(config: Configuration) -> Result<TaskManager, ServiceError> {
 		let mut nonce: U256 = U256::from(0);
 		thread::spawn(move || {
 			log::info!("STARTING MINING");
-			loop {
-				// TODO: Stop if node is not on valid zone
-				// node_is_on_mining_zone(hash, timestamp)
-				let worker = _worker.clone();
-				let metadata = worker.lock().metadata();
-				if let Some(metadata) = metadata {
-					let compute = Compute {
-						difficulty: metadata.difficulty,
-						pre_hash: metadata.pre_hash,
-						nonce,
-					};
-					let seal = compute.compute();
-					if hash_meets_difficulty(&seal.work, seal.difficulty) {
-						nonce = U256::from(0);
-						let mut worker = worker.lock();
-						worker.submit(seal.encode());
-					} else {
-						nonce = nonce.saturating_add(U256::from(1));
-						if nonce == U256::MAX {
-							nonce = U256::from(0);
+			async move {
+				if let Some(ip_addr) = public_ip::addr().await {
+					let worker = _worker.clone();
+					let metadata = worker.lock().metadata();
+					if let Some(metadata) = metadata {
+						let prev_hash = metadata.pre_hash;
+						let ip = &ip_addr.to_string();
+						let is_on_mining_zone = node_is_on_mining_zone(&prev_hash, ip);
+						if is_on_mining_zone {
+							loop {
+								let compute = Compute {
+									difficulty: metadata.difficulty,
+									pre_hash: metadata.pre_hash,
+									nonce,
+								};
+								let seal = compute.compute();
+								if hash_meets_difficulty(&seal.work, seal.difficulty) {
+									nonce = U256::from(0);
+									let mut worker = worker.lock();
+									worker.submit(seal.encode());
+								} else {
+									nonce = nonce.saturating_add(U256::from(1));
+									if nonce == U256::MAX {
+										nonce = U256::from(0);
+									}
+								}
+							}
+						} else {
+							log::info!("Node is not on mining zone");
+							thread::sleep(Duration::new(1, 0));
 						}
+					} else {
+						thread::sleep(Duration::new(1, 0));
 					}
 				} else {
+					println!("Couldn't get an IP address");
 					thread::sleep(Duration::new(1, 0));
 				}
 			}
