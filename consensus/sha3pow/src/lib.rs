@@ -20,6 +20,11 @@ pub fn hash_meets_difficulty(hash: &H256, difficulty: U256) -> bool {
 	!overflowed
 }
 
+pub fn node_is_on_mining_zone(hash: &H256, ip: &str) -> bool {
+	log::info!("Hash: {:?}, IP: {:?}", hash, ip);
+	return geo::node_is_on_mining_zone(hash, ip);
+}
+
 /// A Seal struct that will be encoded to a Vec<u8> as used as the
 /// `RawSeal` type.
 #[derive(Clone, PartialEq, Eq, Encode, Decode, Debug)]
@@ -78,7 +83,7 @@ impl<B: BlockT<Hash = H256>> PowAlgorithm<B> for MinimalSha3Algorithm {
 		// TODO: Use IP from the block
 		let ip = "0.0.0.0";
 		// See whether the node meets the location requirement. If not, fail fast.
-		if !geo::node_is_on_mining_zone(pre_hash, 0, ip) {
+		if !geo::node_is_on_mining_zone(pre_hash, ip) {
 			return Ok(false);
 		}
 

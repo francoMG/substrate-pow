@@ -12,13 +12,6 @@ pub fn gradient_noise(hash: &H256) -> OpenSimplex {
 	return generator;
 }
 
-pub fn minutes_elapsed_since(timestamp: u64) -> u64 {
-	let now = std::time::SystemTime::now();
-	let since_the_epoch = now.duration_since(std::time::UNIX_EPOCH).expect("Time went backwards");
-	let in_seconds = since_the_epoch.as_secs();
-	return (in_seconds - timestamp) / 60;
-}
-
 // TODO: generate simulated lon and lat
 pub fn get_geolocation_by_ip(ip: &str) -> (f64, f64) {
 	let mut seed: u64 = 0;
@@ -31,9 +24,8 @@ pub fn get_geolocation_by_ip(ip: &str) -> (f64, f64) {
 	return (lat, lon);
 }
 
-pub fn node_is_on_mining_zone(hash: &H256, timestamp: u64, ip: &str) -> bool {
+pub fn node_is_on_mining_zone(hash: &H256, ip: &str) -> bool {
 	let generator = gradient_noise(hash);
-	let access = 1.0 - ((minutes_elapsed_since(timestamp) as f64) + 1.0) / 10.0;
 	let mut canvas = [[false; 180]; 360];
 	let mut xoff: f64 = 0.0;
 	let noise_scale = 0.01;
@@ -42,11 +34,12 @@ pub fn node_is_on_mining_zone(hash: &H256, timestamp: u64, ip: &str) -> bool {
 		let mut yoff: f64 = 0.0;
 		for y in 0..180 {
 			let n = generator.get([xoff, yoff]);
-			canvas[x][y] = n > access;
+			canvas[x][y] = n > 0.5;
 			yoff += noise_scale;
 		}
 		xoff += noise_scale;
 	}
+
 	let (lon, lat) = get_geolocation_by_ip(ip);
 	let is_valid_zone = canvas[lon as usize][lat as usize];
 
