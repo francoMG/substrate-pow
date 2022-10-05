@@ -3,6 +3,7 @@
 use super::{AccountId, BalancesConfig, GenesisConfig, Signature, SudoConfig, SystemConfig};
 use sp_core::{sr25519, Pair};
 use sp_runtime::traits::{IdentifyAccount, Verify};
+use crate::ContractsConfig;
 
 /// Helper function to generate a crypto pair from seed
 fn get_from_seed<TPair: Pair>(seed: &str) -> TPair::Public {
@@ -56,5 +57,10 @@ pub fn testnet_genesis(
 		}),
 		pallet_sudo: Some(SudoConfig { key: root_key }),
 		charity: Some(Default::default()),
+		pallet_contracts: Some(ContractsConfig {
+            current_schedule: pallet_contracts::Schedule {
+                    ..Default::default()
+            },
+        }),
 	}
 }

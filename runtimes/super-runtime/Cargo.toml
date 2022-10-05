@@ -31,6 +31,9 @@ sp-version = { version = '3.0', default-features = false }
 pallet-sudo = { version = '3.0', default-features = false }
 pallet-timestamp = { version = '3.0', default-features = false }
 pallet-transaction-payment = { version = '3.0', default-features = false }
+pallet-contracts = { default-features = false, version = '3.0' }
+pallet-contracts-primitives = { default-features = false, version = '3.0' }
+pallet-contracts-rpc-runtime-api = { default-features = false, version = '3.0' }
 
 # local packages
  basic-token = { path = "../../pallets/basic-token", default-features = false }
@@ -54,6 +57,8 @@ pallet-transaction-payment = { version = '3.0', default-features = false }
  storage-cache = { path = "../../pallets/storage-cache", default-features = false }
  struct-storage = { path = "../../pallets/struct-storage", default-features = false }
  vec-set = { path = "../../pallets/vec-set", default-features = false }
+frame-system-rpc-runtime-api = { version = '3.0', default-features = false }
+pallet-transaction-payment-rpc-runtime-api = { version = '3.0', default-features = false }
 
 [build-dependencies]
 substrate-wasm-builder = "4.0.0"
@@ -103,4 +108,9 @@ std = [
 	"pallet-timestamp/std",
 	"pallet-transaction-payment/std",
 	"vec-set/std",
+	'frame-system-rpc-runtime-api/std',
+	'pallet-transaction-payment-rpc-runtime-api/std',
+	"pallet-contracts/std",
+  	"pallet-contracts-primitives/std",
+	"pallet-contracts-rpc-runtime-api/std",
 ]

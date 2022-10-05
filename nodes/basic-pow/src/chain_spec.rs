@@ -3,6 +3,7 @@ use runtime::{
 	GenesisConfig, WASM_BINARY,
 };
 use sp_core::sr25519;
+// use runtime::ContractsConfig;
 
 // Note this is the URL for the telemetry server
 //const STAGING_TELEMETRY_URL: &str = "wss://telemetry.polkadot.io/submit/";
